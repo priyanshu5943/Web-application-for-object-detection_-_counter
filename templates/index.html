@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #333;
+        }
+        .upload-form {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .upload-form input[type="file"] {
+            display: inline-block;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .upload-form button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upload-form button:hover {
+            background-color: #218838;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .results h2 {
+            color: #333;
+        }
+        .object-counts {
+            margin-top: 20px;
+        }
+        .object-counts ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .object-counts li {
+            background: #eee;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .image-container div {
+            width: 48%;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            max-width: 300px; /* limit the image size */
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload an Image for Object Detection</h1>
+        <form class="upload-form" action="/" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*">
+            <button type="submit">Upload</button>
+        </form>
+        {% if input_image and output_image and object_counts %}
+        <div class="results">
+            <h2>Results</h2>
+            <div class="object-counts">
+                <h3>Object Counts</h3>
+                <ul>
+                    {% for label, count in object_counts.items() %}
+                    <li>{{ label }}: {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="image-container">
+                <div>
+                    <h3>Input Image</h3>
+                    <img src="{{ url_for('static', filename='uploads/' + input_image) }}" alt="Input Image">
+                </div>
+                <div>
+                    <h3>Output Image</h3>
+                    <img src="{{ url_for('static', filename='results/' + output_image) }}" alt="Output Image">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
