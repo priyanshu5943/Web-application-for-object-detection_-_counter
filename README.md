@@ -6,8 +6,8 @@ object detection using yolo v8 model along with the number of objects it is cont
 
    
 
-   
-
+   ![image](https://github.com/priyanshu5943/Web-application-for-object-detection_-_counter/blob/main/images/Screenshot%20(11015).png
+)
    # Premium_squad💪
    
    ![image](https://github.com/priyanshu5943/Web-application-for-object-detection/blob/main/images/premium_squad.png)
