@@ -1,12 +1,18 @@
-from flask import Flask, request, render_template, redirect, url_for
+import streamlit as st
 import cv2
 import os
+import numpy as np
 from ultralytics import YOLO
+from PIL import Image
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads/'
-app.config['RESULT_FOLDER'] = 'static/results/'
+# Create upload and result directories if they don't exist
+UPLOAD_FOLDER = 'static/uploads/'
+RESULT_FOLDER = 'static/results/'
 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
+# Load the YOLO model
 model = YOLO('yolov8n.pt')
 
 def detect_objects(image_path):
@@ -23,29 +29,32 @@ def detect_objects(image_path):
             x1, y1, x2, y2 = map(int, box)
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(image, f"{label} {conf:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-    result_path = os.path.join(app.config['RESULT_FOLDER'], os.path.basename(image_path))
+    result_path = os.path.join(RESULT_FOLDER, os.path.basename(image_path))
     cv2.imwrite(result_path, image)
-    return object_counts, os.path.basename(image_path)
+    return object_counts, result_path
 
-@app.route('/', methods=['GET', 'POST'])
-def upload_image():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            return redirect(request.url)
-        if file:
-            filename = file.filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            object_counts, result_filename = detect_objects(file_path)
-            return render_template('index.html', input_image=filename, output_image=result_filename, object_counts=object_counts)
-    return render_template('index.html')
+# Streamlit app
+st.title('Upload an Image for Object Detection')
 
-if __name__ == '__main__':
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-    if not os.path.exists(app.config['RESULT_FOLDER']):
-        os.makedirs(app.config['RESULT_FOLDER'])
-    app.run(debug=True)
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    # Save the uploaded file
+    input_image_path = os.path.join(UPLOAD_FOLDER, uploaded_file.name)
+    with open(input_image_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+
+    # Display the uploaded image
+    st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
+
+    # Detect objects in the uploaded image
+    object_counts, output_image_path = detect_objects(input_image_path)
+
+    # Display object counts
+    st.subheader("Object Counts")
+    for label, count in object_counts.items():
+        st.write(f"{label}: {count}")
+
+    # Display the output image
+    output_image = Image.open(output_image_path)
+    st.image(output_image, caption='Output Image', use_column_width=True)
