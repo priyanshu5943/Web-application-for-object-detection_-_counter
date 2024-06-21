@@ -34,7 +34,7 @@ def detect_objects(image_path):
     return object_counts, result_path
 
 # Streamlit app
-st.title('Upload an Image for Object Detection and counting')
+st.title('Upload an Image for Object Detection and Counting')
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -44,17 +44,20 @@ if uploaded_file is not None:
     with open(input_image_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Display the uploaded image with a fixed width
-    st.image(uploaded_file, caption='Uploaded Image', use_column_width=False, width=300)
+    # Display the images in two columns
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
 
     # Detect objects in the uploaded image
     object_counts, output_image_path = detect_objects(input_image_path)
 
-    # Display object counts
+    with col2:
+        output_image = Image.open(output_image_path)
+        st.image(output_image, caption='Output Image', use_column_width=True)
+
+    # Display object counts below the images
     st.subheader("Object Counts")
     for label, count in object_counts.items():
         st.write(f"{label}: {count}")
-
-    # Display the output image with a fixed width
-    output_image = Image.open(output_image_path)
-    st.image(output_image, caption='Output Image', use_column_width=False, width=300)
